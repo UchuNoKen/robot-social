@@ -1,16 +1,18 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import CardList from "../components/CardList";
 import SearchBox from "../components//SearchBox";
 import Scroll from "../components//Scroll";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "./App.css";
 
+import { setSearchField } from "../actions";
+
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      robots: [],
-      searchfield: ""
+      robots: []
     };
     // console.log("1: constructor");
   }
@@ -22,15 +24,16 @@ class App extends Component {
       .then(users => this.setState({ robots: users }));
   }
 
-  onSearchChange = event => {
-    // console.log(event.target.value);
-    this.setState({ searchfield: event.target.value });
-  };
+  // onSearchChange = event => {
+  //   // console.log(event.target.value);
+  //   this.setState({ searchfield: event.target.value });
+  // };
 
   render() {
-    const { robots, searchfield } = this.state;
+    const { robots } = this.state;
+    const { searchField, onSearchChange } = this.props;
     const filteredRobots = robots.filter(robot => {
-      return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+      return robot.name.toLowerCase().includes(searchField.toLowerCase());
     });
     return !robots.length ? (
       <h1>Loading...</h1>
@@ -38,7 +41,7 @@ class App extends Component {
       //   console.log("3: render");
       <div className="tc">
         <h1 className="f1">Robo-Friends</h1>
-        <SearchBox searchChange={this.onSearchChange} />
+        <SearchBox searchChange={onSearchChange} />
         <Scroll>
           <ErrorBoundary>
             <CardList robots={filteredRobots} />
@@ -49,21 +52,19 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    searchField: state.searchField
+  };
+};
 
-/* 
-'
-Before using class based component
-'
-const App = () => {
-    return (
-        <div className='tc'>
-          <h1>Robo-Friends</h1>
-          <SearchBox />
-          <CardList robots={robots}/>
-        </div>
-    );
-}
+const mapDispatchToProps = dispatch => {
+  return {
+    onSearchChange: event => dispatch(setSearchField(event.target.value))
+  };
+};
 
-export default App;
-*/
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
